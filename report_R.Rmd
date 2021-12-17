@@ -1,0 +1,182 @@
+---
+title: "Stock Report"
+author: ""
+date: "`r format(Sys.Date())`"
+output: pdf_document
+geometry: margin=1.2cm
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  - \usepackage{caption}
+  - \usepackage{subcaption}
+  - \usepackage{multicol}
+  - \usepackage{float}
+  - \usepackage{hyperref}
+  - \usepackage{listings}
+
+fontsize: 12pt
+---
+
+<!-- R setup libraries, using python -->
+```{r setup, include=FALSE, echo=FALSE}
+library(reticulate)
+use_python("/usr/bin/python3")
+```
+
+<!-- Execute python scripts-->
+```{r, echo=FALSE, message=FALSE, results='hide'} 
+
+source_python("main.py")
+
+```
+
+<!-- LaTeX preamble-->
+\graphicspath{ {./rif-logos/} }
+<!-- Listings setup -->
+\lstset{
+  basicstyle=\small\ttfamily,
+  columns=flexible,
+  breaklines=true
+}
+<!-- Hyperlinks -->
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  filecolor=magenta,      
+  urlcolor=cyan,
+}
+
+<!-- Start of Document -->
+
+\vspace{-0.5cm}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=8cm, height=3cm]{RIF-Logo-(MaroonTransparentBackground).png}
+\end{figure}
+\vspace{-0.75cm}
+
+\section*{Market Profile}
+\vspace{-0.25cm}
+\begin{table}[h] 
+  \label{tab:table1} 
+  \begin{tabular}{p{5cm}p{12cm}}
+      \hline
+      \multicolumn{2}{c}{`r py$TICKER` Profile} \\
+      \hline
+      Price & `r py$PRICE` \\
+      Beta & `r py$BETA` \\
+      Market Cap & `r py$MARKET_CAP` \\
+      P/E & `r py$P_E` \\
+      P/B & `r py$P_B` \\ 
+      EPS ttm & `r py$EPS` \\
+      ROE  & `r py$ROE`\% \\
+      ROI & `r py$ROI`\% \\
+      \hline
+  \end{tabular}
+\end{table}
+\vspace{-0.75cm}
+\section*{Stock Chart}
+\vspace{-0.5cm}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\linewidth, height=11cm]{"./rif-logos/price-chart.png"}
+  \label{fig:price-chart}
+\end{figure}
+
+\section*{Company Summary}
+`r py$SUMMARY`
+
+\section*{Financials}
+
+\begin{figure}
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{"./rif-logos/revenue_earnings.png"}
+  \label{fig:re}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{"./rif-logos/gross-profit.png"}
+  \label{fig:gp}
+\end{minipage}
+\end{figure}
+
+\newpage
+
+\begin{figure}
+
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{"./rif-logos/fcf.png"}
+  \label{fig:fcf}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{"./rif-logos/ebit.png"}
+  \label{fig:ebit}
+\end{minipage}
+
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{"./rif-logos/debt_short.png"}
+  \label{fig:ds}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{"./rif-logos/debt_long.png"}
+  \label{fig:dl}
+\end{minipage}
+\end{figure}
+
+
+\section*{Recent News}
+
+`r py$STORY1_DATE` \null\hfill \href{`r py$STORY1_LINK`}{[Article Link]}
+\begin{lstlisting}
+`r py$STORY1_SHORT`
+\end{lstlisting}
+
+`r py$STORY2_DATE` \null\hfill \href{`r py$STORY2_LINK`}{[Article Link]}
+\begin{lstlisting}
+`r py$STORY2_SHORT`
+\end{lstlisting}
+
+`r py$STORY3_DATE` \null\hfill \href{`r py$STORY3_LINK`}{[Article Link]}
+\begin{lstlisting}
+`r py$STORY3_SHORT`
+\end{lstlisting}
+
+`r py$STORY4_DATE` \null\hfill \href{`r py$STORY4_LINK`}{[Article Link]}
+\begin{lstlisting}
+`r py$STORY4_SHORT`
+\end{lstlisting}
+
+`r py$STORY5_DATE` \null\hfill \href{`r py$STORY5_LINK`}{[Article Link]}
+\begin{lstlisting}
+`r py$STORY5_SHORT`
+\end{lstlisting}
+
+
+\section*{Sources}
+
+\begin{table}[h] 
+  \label{tab:sources} 
+  \begin{tabular}{p{8cm}p{4cm}p{6cm}}
+      \multicolumn{3}{c}{} \\
+      Market Profile and News & \href{https://finviz.com/}{Finviz} &  `r py$EXACT_TIME`\\ 
+      \vspace{0.5cm} &  \vspace{0.5cm} & \vspace{0.5cm}\\
+      Company Summary and Chart Data & \href{https://finance.yahoo.com/}{Yahoo! Finance} & `r py$EXACT_TIME`\\ 
+  \end{tabular}
+\end{table}
+
+```{python, echo=FALSE, message=FALSE, results='hide'}
+import slack
+#import slackclient
+
+client = slack.WebClient(token = 'xoxb-596484384067-2508309944515-moy3XWjuLDgvSjtv3tCOwShp')
+client.files_upload(channels = '#sector-materials', file='./report_R.pdf')
+```
+
