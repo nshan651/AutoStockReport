@@ -1,6 +1,9 @@
 import slack
 import urllib.request
 import requests
+import os
+from dotenv import load_dotenv
 
-client = slack.WebClient(token = 'xoxb-596484384067-2508309944515-moy3XWjuLDgvSjtv3tCOwShp')
-client.files_upload(channels = '#sector-materials', file='./report_R.pdf')
+load_dotenv('.env')
+client = slack.WebClient(token = os.getenv('SLACK_TOKEN')) 
+client.files_upload(channels = os.getenv('CHANNEL_NAME', file='./report_R.pdf')
